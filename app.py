@@ -44,7 +44,7 @@ def welcome():
         f"/api/v1.0/<<" + f"start-date"#+">><br/>"
         f"/api/v1.0/start-date/end-date"
     )
-
+#&gt &lt
 
 @app.route("/api/v1.0/precipitation")
 def precip():
@@ -106,7 +106,7 @@ def tobs():
 
 @app.route("/api/v1.0/<start_date>")
 def start(start_date):
-    # Create our session
+
     session = Session(engine)
 
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start"""
@@ -120,6 +120,18 @@ def start(start_date):
 
     return jsonify(stats_results)
 
+
+@app.route("/api/v1.0/<start_date>/<end_date>")
+def startend(start_date,end_date):
+
+    session = Session(engine)
+
+    
+
+    session.close()  
+ 
+
+    return jsonify(stats_results)
 
 if __name__ == '__main__':
     app.run(debug=True)
