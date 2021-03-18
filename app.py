@@ -41,14 +41,14 @@ def welcome():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/<<" + f"start-date"#+">><br/>"
-        f"/api/v1.0/start-date/end-date"
+        f"/api/v1.0/&ltstart-date(YYYY-MM-DD)&gt<br/>"
+        f"/api/v1.0/&ltstart-date&gt/&ltend-date&gt"
     )
 #&gt &lt
 
 @app.route("/api/v1.0/precipitation")
 def precip():
-    # Create our session
+    # Create the session
     session = Session(engine)
 
     """Return a list of dates and precip amts"""
@@ -65,17 +65,16 @@ def precip():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    # Create our session
     session = Session(engine)
 
     """Return a list of stations"""
-    #Return a JSON list of stations from the dataset
+    #Return a JSON list of stations from the dataset.  Returning all station data
     results = session.query(Station.id,Station.station, Station.name, Station.elevation,Station.latitude,Station.longitude).all()
 
     session.close()  
     all_stations=results #all_stations is a list of lists.  TODO confirm if need to limit to just station name or whatever
 
-    # this will return results into single list
+    # this will roll results into single list
     #all_stations = list(np.ravel(results))
 
     return jsonify(all_stations)
@@ -95,22 +94,25 @@ def tobs():
     mas_recent_date[0][0]
     # get a year back from most recent date
     mas_yearago=dt.date(2017,8,18)-dt.timedelta(days=365)
-    # Query the temps for the last year  TODO just return tobs?
+    # Query the temps for the last year  
     temp_results = session.query(Msrmt.date,Msrmt.tobs).filter(Msrmt.date >= mas_yearago).filter(Msrmt.station==mostActiveStation).all()
 
 
     session.close()  
  
-
+    #Return a JSON list of temperature observations (TOBS) for the previous year.
     return jsonify(temp_results)
 
 @app.route("/api/v1.0/<start_date>")
 def start(start_date):
 
     session = Session(engine)
+    print(start_date)
+    query_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
+    print(type(query_date))
 
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start"""
-    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).filter(Msrmt.date >= start_date).all()
+    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).filter(Msrmt.date >= query_date).all()
 
 
     
@@ -125,7 +127,15 @@ def start(start_date):
 def startend(start_date,end_date):
 
     session = Session(engine)
+    start_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
+    end_date = dt.datetime.strptime(end_date,'%Y-%m-%d')
+    print(type(end_date))
 
+    """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start"""
+    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).filter(Msrmt.date >= start_date).filter(Msrmt.date <= end_date).all()
+
+
+    
     
 
     session.close()  
