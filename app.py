@@ -41,6 +41,7 @@ def welcome():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/&ltstart-date(YYYY-MM-DD)&gt<br/>"
         f"/api/v1.0/&ltstart-date&gt/&ltend-date&gt"
     )
@@ -82,7 +83,6 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
-    # Create our session
     session = Session(engine)
 
     """Return a list of dates and temps for the most active station for the last year"""
@@ -109,6 +109,8 @@ def start(start_date):
 
     session = Session(engine)
     #print(start_date) #testing output
+    #future iteration: add validation here to ensure the date is of the expected format
+    #future iteration: add validation to provide error if the date is outside the data set
     query_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
     #print(type(query_date)) #testing output
 
@@ -130,17 +132,17 @@ def startend(start_date,end_date):
     session = Session(engine)
     start_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
     end_date = dt.datetime.strptime(end_date,'%Y-%m-%d')
-    print(start_date)
-    print(end_date)
+#    print(start_date) #testing output
+#    print(end_date)  #testing output
 
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start/end date"""
-    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).\
+    se_stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).\
         filter(Msrmt.date >= start_date).filter(Msrmt.date <= end_date).all()
 
     session.close()  
  
 
-    return jsonify(stats_results)
+    return jsonify(se_stats_results)
 
 if __name__ == '__main__':
     app.run(debug=True)
