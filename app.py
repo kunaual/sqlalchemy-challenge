@@ -68,15 +68,16 @@ def stations():
     session = Session(engine)
 
     """Return a list of stations"""
-    #Return a JSON list of stations from the dataset.  Returning all station data
+    #Return a JSON list of stations from the dataset.  Returning all station data. to return a single peice of data change the query below to limit to that one column
     results = session.query(Station.id,Station.station, Station.name, Station.elevation,Station.latitude,Station.longitude).all()
 
     session.close()  
-    all_stations=results #all_stations is a list of lists.  TODO confirm if need to limit to just station name or whatever
+    all_stations=results #all_stations is a list of lists. 
 
     # this will roll results into single list
     #all_stations = list(np.ravel(results))
 
+    #returning all station information
     return jsonify(all_stations)
 
 @app.route("/api/v1.0/tobs")
@@ -107,9 +108,9 @@ def tobs():
 def start(start_date):
 
     session = Session(engine)
-    print(start_date)
+    #print(start_date) #testing output
     query_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
-    print(type(query_date))
+    #print(type(query_date)) #testing output
 
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start"""
     stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).filter(Msrmt.date >= query_date).all()
@@ -129,14 +130,12 @@ def startend(start_date,end_date):
     session = Session(engine)
     start_date = dt.datetime.strptime(start_date,'%Y-%m-%d')
     end_date = dt.datetime.strptime(end_date,'%Y-%m-%d')
-    print(type(end_date))
+    print(start_date)
+    print(end_date)
 
-    """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start"""
-    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).filter(Msrmt.date >= start_date).filter(Msrmt.date <= end_date).all()
-
-
-    
-    
+    """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start/end date"""
+    stats_results=session.query(func.min(Msrmt.tobs), func.avg(Msrmt.tobs), func.max(Msrmt.tobs)).\
+        filter(Msrmt.date >= start_date).filter(Msrmt.date <= end_date).all()
 
     session.close()  
  
